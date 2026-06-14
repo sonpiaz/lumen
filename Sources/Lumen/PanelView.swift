@@ -191,14 +191,18 @@ private struct ThemeSwatch: View {
 
     var body: some View {
         Button(action: action) {
-            Circle()
-                .fill(theme.ringFill(45))
-                .frame(width: 13, height: 13)
-                .overlay(Circle().strokeBorder(.primary.opacity(0.22), lineWidth: 0.5))
-                .overlay(
-                    Circle().strokeBorder(.primary.opacity(selected ? 0.85 : 0), lineWidth: 1.5)
-                        .padding(-3)
-                )
+            ZStack {
+                // Background tone (black vs white) + accent ring — conveys the
+                // whole theme, so a dark-blue and a light-blue theme stay distinct.
+                Circle().fill(theme.scheme == .light ? Color.white : Color.black)
+                Circle().strokeBorder(theme.ringFill(45), lineWidth: 2.5)
+            }
+            .frame(width: 14, height: 14)
+            .overlay(Circle().strokeBorder(.primary.opacity(0.22), lineWidth: 0.5))
+            .overlay(
+                Circle().strokeBorder(.primary.opacity(selected ? 0.85 : 0), lineWidth: 1.5)
+                    .padding(-3)
+            )
         }
         .buttonStyle(.plain)
         .help(theme.name)

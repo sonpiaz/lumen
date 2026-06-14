@@ -65,136 +65,6 @@ if let idx = CommandLine.arguments.firstIndex(of: "--render-themes"),
     exit(0)
 }
 
-// Render Linear / Stripe brand palettes on black glass: `--render-brands <dir>`.
-if let idx = CommandLine.arguments.firstIndex(of: "--render-brands"),
-   idx + 1 < CommandLine.arguments.count {
-    let dir = CommandLine.arguments[idx + 1]
-    let variants: [(String, [UInt32])] = [
-        ("linear-indigo", [0x5E6AD2]),
-        ("linear-gradient", [0x5E6AD2, 0xB57BFF]),
-        ("stripe-blurple", [0x635BFF]),
-        ("stripe-gradient", [0x00D4FF, 0x635BFF, 0xFF61C3]),
-        ("stripe-flow", [0x11EFE3, 0x635BFF, 0xFF80B5, 0xFFB199]),
-    ]
-    MainActor.assumeIsolated {
-        let app = NSApplication.shared
-        app.setActivationPolicy(.accessory)
-        for (name, hexes) in variants {
-            let theme = Theme.obsidian.recolored(hexes.map { Color(hex: $0) })
-            let monitor = Monitor()
-            monitor.loadPreviewData()
-            let preview = ZStack {
-                WallpaperBackdrop()
-                PanelView(monitor: monitor, themeStore: ThemeStore(theme: theme), onQuit: {}).padding(22)
-            }
-            .frame(width: 364, height: 429)
-            let host = NSHostingView(rootView: preview)
-            host.frame = NSRect(x: 0, y: 0, width: 364, height: 429)
-            let window = NSWindow(contentRect: host.frame, styleMask: [.borderless],
-                                  backing: .buffered, defer: false)
-            window.contentView = host
-            window.setFrameOrigin(NSPoint(x: -10_000, y: -10_000))
-            window.orderFront(nil)
-            RunLoop.main.run(until: Date().addingTimeInterval(0.5))
-            if let rep = host.bitmapImageRepForCachingDisplay(in: host.bounds) {
-                host.cacheDisplay(in: host.bounds, to: rep)
-                if let data = rep.representation(using: .png, properties: [:]) {
-                    try? data.write(to: URL(fileURLWithPath: "\(dir)/\(name).png"))
-                    print("wrote \(dir)/\(name).png")
-                }
-            }
-        }
-    }
-    exit(0)
-}
-
-// Render Vercel/Geist ring treatments on black glass: `--render-vercel <dir>`.
-if let idx = CommandLine.arguments.firstIndex(of: "--render-vercel"),
-   idx + 1 < CommandLine.arguments.count {
-    let dir = CommandLine.arguments[idx + 1]
-    let variants: [(String, [Color])] = [
-        ("gradient", [Color(hex: 0x0070F3), Color(hex: 0x7928CA), Color(hex: 0xFF0080)]),
-        ("blue", [Color(hex: 0x0070F3)]),
-        ("mono", [Color(hex: 0xEDEDED), Color(hex: 0xA1A1A1)]),
-        ("cyan-pink", [Color(hex: 0x00DFD8), Color(hex: 0xFF0080)]),
-    ]
-    MainActor.assumeIsolated {
-        let app = NSApplication.shared
-        app.setActivationPolicy(.accessory)
-        for (name, stops) in variants {
-            let theme = Theme.vercel.recolored(stops)
-            let monitor = Monitor()
-            monitor.loadPreviewData()
-            let preview = ZStack {
-                WallpaperBackdrop()
-                PanelView(monitor: monitor, themeStore: ThemeStore(theme: theme), onQuit: {}).padding(22)
-            }
-            .frame(width: 364, height: 429)
-            let host = NSHostingView(rootView: preview)
-            host.frame = NSRect(x: 0, y: 0, width: 364, height: 429)
-            let window = NSWindow(contentRect: host.frame, styleMask: [.borderless],
-                                  backing: .buffered, defer: false)
-            window.contentView = host
-            window.setFrameOrigin(NSPoint(x: -10_000, y: -10_000))
-            window.orderFront(nil)
-            RunLoop.main.run(until: Date().addingTimeInterval(0.5))
-            if let rep = host.bitmapImageRepForCachingDisplay(in: host.bounds) {
-                host.cacheDisplay(in: host.bounds, to: rep)
-                if let data = rep.representation(using: .png, properties: [:]) {
-                    try? data.write(to: URL(fileURLWithPath: "\(dir)/vercel-\(name).png"))
-                    print("wrote \(dir)/vercel-\(name).png")
-                }
-            }
-        }
-    }
-    exit(0)
-}
-
-// Render Obsidian with a palette of ring accent colours: `--render-rings <dir>`.
-if let idx = CommandLine.arguments.firstIndex(of: "--render-rings"),
-   idx + 1 < CommandLine.arguments.count {
-    let dir = CommandLine.arguments[idx + 1]
-    let palette: [(String, UInt32, UInt32)] = [
-        ("cyan", 0x64D2FF, 0x5E9DFF),
-        ("blue", 0x0A84FF, 0x5E5CE6),
-        ("violet", 0xA78BFF, 0x64D2FF),
-        ("magenta", 0xFF5AF2, 0x64D2FF),
-        ("mint", 0x30D158, 0x39FFB0),
-        ("amber", 0xFFB340, 0xFF7A1F),
-        ("white", 0xEAEAF0, 0xC8CCD6),
-    ]
-    MainActor.assumeIsolated {
-        let app = NSApplication.shared
-        app.setActivationPolicy(.accessory)
-        for (name, a, b) in palette {
-            let theme = Theme.obsidian.recolored([Color(hex: a), Color(hex: b)])
-            let monitor = Monitor()
-            monitor.loadPreviewData()
-            let preview = ZStack {
-                WallpaperBackdrop()
-                PanelView(monitor: monitor, themeStore: ThemeStore(theme: theme), onQuit: {}).padding(22)
-            }
-            .frame(width: 364, height: 429)
-            let host = NSHostingView(rootView: preview)
-            host.frame = NSRect(x: 0, y: 0, width: 364, height: 429)
-            let window = NSWindow(contentRect: host.frame, styleMask: [.borderless],
-                                  backing: .buffered, defer: false)
-            window.contentView = host
-            window.setFrameOrigin(NSPoint(x: -10_000, y: -10_000))
-            window.orderFront(nil)
-            RunLoop.main.run(until: Date().addingTimeInterval(0.5))
-            if let rep = host.bitmapImageRepForCachingDisplay(in: host.bounds) {
-                host.cacheDisplay(in: host.bounds, to: rep)
-                if let data = rep.representation(using: .png, properties: [:]) {
-                    try? data.write(to: URL(fileURLWithPath: "\(dir)/ring-\(name).png"))
-                    print("wrote \(dir)/ring-\(name).png")
-                }
-            }
-        }
-    }
-    exit(0)
-}
-
 // Headless UI render: `Lumen --render-panel <out.png> [themeId]` renders the
 // dropdown panel with representative data — verify the design without Screen
 // Recording permission.
@@ -202,7 +72,7 @@ if let idx = CommandLine.arguments.firstIndex(of: "--render-panel"),
    idx + 1 < CommandLine.arguments.count {
     let outPath = CommandLine.arguments[idx + 1]
     let theme = idx + 2 < CommandLine.arguments.count
-        ? Theme.byId(CommandLine.arguments[idx + 2]) : Theme.obsidian
+        ? Theme.byId(CommandLine.arguments[idx + 2]) : Theme.vercel
     MainActor.assumeIsolated {
         let app = NSApplication.shared
         app.setActivationPolicy(.accessory)

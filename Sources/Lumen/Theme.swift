@@ -44,37 +44,12 @@ struct Theme: Identifiable {
         ringStops: [Color(hex: 0x0A84FF), Color(hex: 0x5E5CE6)],
         warn: Color(hex: 0xFF9500), danger: Color(hex: 0xFF3B30))
 
-    /// Deep black glass — the "black hole" / Grok-dark look.
-    static let obsidian = Theme(
-        id: "obsidian", name: "Obsidian", tagline: "Black-hole glass",
-        scheme: .dark, wash: Color.black.opacity(0.34),
-        accent: Color(hex: 0x64D2FF), accent2: Color(hex: 0x7C6CFF),
-        ringStops: [Color(hex: 0x64D2FF), Color(hex: 0x7C6CFF)],
-        warn: Color(hex: 0xFFD60A), danger: Color(hex: 0xFF453A))
-
     /// Vercel / Geist: pure-black glass, single signature blue ring. (Default.)
     static let vercel = Theme(
         id: "vercel", name: "Vercel", tagline: "Geist black + signature blue",
         scheme: .dark, wash: Color.black.opacity(0.44),
         accent: Color(hex: 0x0070F3), accent2: Color(hex: 0x3D9DFF),
         ringStops: [Color(hex: 0x0070F3)],
-        warn: Color(hex: 0xF5A623), danger: Color(hex: 0xEE0000))
-
-    /// Linear: black glass, refined indigo ring.
-    static let linear = Theme(
-        id: "linear", name: "Linear", tagline: "Black glass + indigo",
-        scheme: .dark, wash: Color.black.opacity(0.42),
-        accent: Color(hex: 0x5E6AD2), accent2: Color(hex: 0x8B5CF6),
-        ringStops: [Color(hex: 0x5E6AD2)],
-        warn: Color(hex: 0xF5A623), danger: Color(hex: 0xEE0000))
-
-    /// Stripe: black glass, the signature flowing multi-colour gradient ring.
-    static let stripe = Theme(
-        id: "stripe", name: "Stripe", tagline: "Black glass + flow gradient",
-        scheme: .dark, wash: Color.black.opacity(0.42),
-        accent: Color(hex: 0x635BFF), accent2: Color(hex: 0xFF80B5),
-        ringStops: [Color(hex: 0x11EFE3), Color(hex: 0x635BFF),
-                    Color(hex: 0xFF80B5), Color(hex: 0xFFB199)],
         warn: Color(hex: 0xF5A623), danger: Color(hex: 0xEE0000))
 
     // MARK: Warm tinted glass
@@ -86,7 +61,7 @@ struct Theme: Identifiable {
         ringStops: [Color(hex: 0xFF9D3D), Color(hex: 0xFF5E3A)],
         warn: Color(hex: 0xFFC24D), danger: Color(hex: 0xFF4D3D))
 
-    static let all: [Theme] = [vercel, obsidian, linear, stripe, clear, ember]
+    static let all: [Theme] = [vercel, clear, ember]
     static func byId(_ id: String) -> Theme { all.first { $0.id == id } ?? vercel }
 
     /// Same theme with different ring colours (gradient = the stops given).
