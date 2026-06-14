@@ -41,6 +41,18 @@ top memory-hungry apps, each with its real icon. Quit an app with the ⏏ button
 - node_modules, Docker data, and Xcode Archives are surfaced but reveal-only —
   Lumen won't delete things that are painful to rebuild.
 
+## Themes
+
+Lumen is built on real translucency (frosted "liquid glass" that samples your
+desktop). Six built-in themes, switchable from the swatches in the panel footer
+and remembered across launches:
+
+![Lumen themes](docs/themes.png)
+
+**Vercel** (default) · **Obsidian** · **Linear** · **Stripe** (signature flow
+gradient) · **Clear** (frosted white) · **Ember**. Every theme keeps the same
+severity signal — rings and bars warm to amber, then red, as load climbs.
+
 ## Design principles
 
 - **Light by default.** ~14 MB idle. No subprocesses or daemons for monitoring —

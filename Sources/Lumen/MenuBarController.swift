@@ -6,12 +6,13 @@ import SwiftUI
 @MainActor
 final class MenuBarController: NSObject, NSWindowDelegate {
     private let monitor = Monitor()
+    private let themeStore = ThemeStore()
     private var statusItem: NSStatusItem?
     private var panel: NSPanel?
     private var outsideClickMonitor: Any?
     private var timer: Timer?
     private var cpuHistory: [Double] = []   // recent CPU samples for the sparkline
-    private let storage = StorageWindowController()
+    private lazy var storage = StorageWindowController(themeStore: themeStore)
 
     func install() {
         let item = NSStatusBar.system.statusItem(withLength: NSStatusItem.variableLength)
@@ -72,7 +73,7 @@ final class MenuBarController: NSObject, NSWindowDelegate {
         monitor.processesActive = true
         monitor.refreshProcesses()
 
-        let view = PanelView(monitor: monitor, onQuit: { [weak self] in
+        let view = PanelView(monitor: monitor, themeStore: themeStore, onQuit: { [weak self] in
             self?.dismissPanel()
             NSApp.terminate(nil)
         }, onOpenStorage: { [weak self] in

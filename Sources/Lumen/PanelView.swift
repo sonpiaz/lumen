@@ -7,24 +7,27 @@ import AppKit
 /// attention.
 struct PanelView: View {
     @ObservedObject var monitor: Monitor
+    @ObservedObject var themeStore: ThemeStore
     var onQuit: () -> Void
     var onOpenStorage: () -> Void = {}
+    private var theme: Theme { themeStore.theme }
 
     var body: some View {
         VStack(alignment: .leading, spacing: 0) {
             header
             rings
-            Divider().padding(.horizontal, 16)
+            Divider().overlay(.primary.opacity(0.08)).padding(.horizontal, 16)
             processSection
             footer
         }
         .frame(width: 320)
-        .background(.regularMaterial)
+        .background(ThemeBackground(theme: theme))
         .clipShape(RoundedRectangle(cornerRadius: 16, style: .continuous))
         .overlay(
             RoundedRectangle(cornerRadius: 16, style: .continuous)
-                .strokeBorder(.white.opacity(0.08), lineWidth: 0.5)
+                .strokeBorder(.primary.opacity(0.12), lineWidth: 0.5)
         )
+        .environment(\.colorScheme, theme.scheme)
     }
 
     // MARK: Header
@@ -52,13 +55,13 @@ struct PanelView: View {
         HStack(spacing: 0) {
             RingGauge(label: "CPU", percent: monitor.system.cpuPercent,
                       detail: "\(ProcessInfo.processInfo.activeProcessorCount) cores",
-                      tint: Palette.tint(monitor.system.cpuPercent))
+                      fill: theme.ringFill(monitor.system.cpuPercent))
             RingGauge(label: "Memory", percent: monitor.system.ramPercent,
                       detail: Fmt.bytes(monitor.system.ramUsedBytes),
-                      tint: Palette.tint(monitor.system.ramPercent))
+                      fill: theme.ringFill(monitor.system.ramPercent))
             RingGauge(label: "Disk", percent: monitor.system.diskPercent,
                       detail: Fmt.compact(monitor.system.diskTotalBytes - monitor.system.diskUsedBytes) + " free",
-                      tint: Palette.tint(monitor.system.diskPercent, red: 95, orange: 85),
+                      fill: theme.ringFill(monitor.system.diskPercent, warnAt: 85, dangerAt: 95),
                       onTap: onOpenStorage)
         }
         .padding(.horizontal, 8)
@@ -100,11 +103,12 @@ struct PanelView: View {
     // MARK: Footer
 
     private var footer: some View {
-        HStack(spacing: 6) {
-            Image(systemName: "option")
-                .font(.system(size: 9, weight: .semibold))
-            Text("click ⏏ to force quit")
-                .font(.system(size: 10))
+        HStack(spacing: 7) {
+            ForEach(Theme.all) { t in
+                ThemeSwatch(theme: t, selected: t.id == theme.id) {
+                    themeStore.select(t.id)
+                }
+            }
             Spacer()
             Button(action: onQuit) {
                 Text("Quit Lumen")
@@ -115,8 +119,8 @@ struct PanelView: View {
         }
         .foregroundStyle(.tertiary)
         .padding(.horizontal, 16)
-        .padding(.vertical, 11)
-        .background(.black.opacity(0.04))
+        .padding(.vertical, 10)
+        .background(.primary.opacity(0.04))
     }
 }
 
@@ -126,7 +130,7 @@ private struct RingGauge: View {
     let label: String
     let percent: Double
     let detail: String
-    let tint: Color
+    let fill: AnyShapeStyle
     var onTap: (() -> Void)? = nil
     @State private var hovering = false
 
@@ -138,7 +142,7 @@ private struct RingGauge: View {
                 Circle()
                     .trim(from: 0, to: min(1, max(0, percent / 100)))
                     .stroke(
-                        tint.gradient,
+                        fill,
                         style: StrokeStyle(lineWidth: 5.5, lineCap: .round)
                     )
                     .rotationEffect(.degrees(-90))
@@ -175,6 +179,29 @@ private struct RingGauge: View {
         .onHover { hovering = $0 }
         .onTapGesture { onTap?() }
         .help(onTap != nil ? "Open Storage — see what's filling your disk" : "")
+    }
+}
+
+// MARK: - Theme swatch
+
+private struct ThemeSwatch: View {
+    let theme: Theme
+    let selected: Bool
+    var action: () -> Void
+
+    var body: some View {
+        Button(action: action) {
+            Circle()
+                .fill(theme.ringFill(45))
+                .frame(width: 13, height: 13)
+                .overlay(Circle().strokeBorder(.primary.opacity(0.22), lineWidth: 0.5))
+                .overlay(
+                    Circle().strokeBorder(.primary.opacity(selected ? 0.85 : 0), lineWidth: 1.5)
+                        .padding(-3)
+                )
+        }
+        .buttonStyle(.plain)
+        .help(theme.name)
     }
 }
 

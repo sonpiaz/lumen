@@ -20,7 +20,7 @@ if CommandLine.arguments.contains("--open-storage") {
     let app = NSApplication.shared
     let storage = MainActor.assumeIsolated { () -> StorageWindowController in
         app.setActivationPolicy(.regular)
-        let s = StorageWindowController()
+        let s = StorageWindowController(themeStore: ThemeStore())
         s.show()
         return s
     }
@@ -28,18 +28,187 @@ if CommandLine.arguments.contains("--open-storage") {
     app.run()
 }
 
-// Headless UI render: `Lumen --render-panel <out.png>` renders the dropdown
-// panel with representative data and writes a PNG — lets the design be verified
-// without Screen Recording permission.
+// Render each cosmic theme's panel to <dir>/<id>.png for visual comparison.
+if let idx = CommandLine.arguments.firstIndex(of: "--render-themes"),
+   idx + 1 < CommandLine.arguments.count {
+    let dir = CommandLine.arguments[idx + 1]
+    MainActor.assumeIsolated {
+        let app = NSApplication.shared
+        app.setActivationPolicy(.accessory)
+        for theme in Theme.all {
+            let monitor = Monitor()
+            monitor.loadPreviewData()
+            // Frosted glass needs something behind it to frost — render the panel
+            // over a stand-in wallpaper so the translucency is visible.
+            let preview = ZStack {
+                WallpaperBackdrop()
+                PanelView(monitor: monitor, themeStore: ThemeStore(theme: theme), onQuit: {}).padding(22)
+            }
+            .frame(width: 364, height: 429)
+            let host = NSHostingView(rootView: preview)
+            host.frame = NSRect(x: 0, y: 0, width: 364, height: 429)
+            let window = NSWindow(contentRect: host.frame, styleMask: [.borderless],
+                                  backing: .buffered, defer: false)
+            window.contentView = host
+            window.setFrameOrigin(NSPoint(x: -10_000, y: -10_000))
+            window.orderFront(nil)
+            RunLoop.main.run(until: Date().addingTimeInterval(0.5))
+            if let rep = host.bitmapImageRepForCachingDisplay(in: host.bounds) {
+                host.cacheDisplay(in: host.bounds, to: rep)
+                if let data = rep.representation(using: .png, properties: [:]) {
+                    try? data.write(to: URL(fileURLWithPath: "\(dir)/\(theme.id).png"))
+                    print("wrote \(dir)/\(theme.id).png")
+                }
+            }
+        }
+    }
+    exit(0)
+}
+
+// Render Linear / Stripe brand palettes on black glass: `--render-brands <dir>`.
+if let idx = CommandLine.arguments.firstIndex(of: "--render-brands"),
+   idx + 1 < CommandLine.arguments.count {
+    let dir = CommandLine.arguments[idx + 1]
+    let variants: [(String, [UInt32])] = [
+        ("linear-indigo", [0x5E6AD2]),
+        ("linear-gradient", [0x5E6AD2, 0xB57BFF]),
+        ("stripe-blurple", [0x635BFF]),
+        ("stripe-gradient", [0x00D4FF, 0x635BFF, 0xFF61C3]),
+        ("stripe-flow", [0x11EFE3, 0x635BFF, 0xFF80B5, 0xFFB199]),
+    ]
+    MainActor.assumeIsolated {
+        let app = NSApplication.shared
+        app.setActivationPolicy(.accessory)
+        for (name, hexes) in variants {
+            let theme = Theme.obsidian.recolored(hexes.map { Color(hex: $0) })
+            let monitor = Monitor()
+            monitor.loadPreviewData()
+            let preview = ZStack {
+                WallpaperBackdrop()
+                PanelView(monitor: monitor, themeStore: ThemeStore(theme: theme), onQuit: {}).padding(22)
+            }
+            .frame(width: 364, height: 429)
+            let host = NSHostingView(rootView: preview)
+            host.frame = NSRect(x: 0, y: 0, width: 364, height: 429)
+            let window = NSWindow(contentRect: host.frame, styleMask: [.borderless],
+                                  backing: .buffered, defer: false)
+            window.contentView = host
+            window.setFrameOrigin(NSPoint(x: -10_000, y: -10_000))
+            window.orderFront(nil)
+            RunLoop.main.run(until: Date().addingTimeInterval(0.5))
+            if let rep = host.bitmapImageRepForCachingDisplay(in: host.bounds) {
+                host.cacheDisplay(in: host.bounds, to: rep)
+                if let data = rep.representation(using: .png, properties: [:]) {
+                    try? data.write(to: URL(fileURLWithPath: "\(dir)/\(name).png"))
+                    print("wrote \(dir)/\(name).png")
+                }
+            }
+        }
+    }
+    exit(0)
+}
+
+// Render Vercel/Geist ring treatments on black glass: `--render-vercel <dir>`.
+if let idx = CommandLine.arguments.firstIndex(of: "--render-vercel"),
+   idx + 1 < CommandLine.arguments.count {
+    let dir = CommandLine.arguments[idx + 1]
+    let variants: [(String, [Color])] = [
+        ("gradient", [Color(hex: 0x0070F3), Color(hex: 0x7928CA), Color(hex: 0xFF0080)]),
+        ("blue", [Color(hex: 0x0070F3)]),
+        ("mono", [Color(hex: 0xEDEDED), Color(hex: 0xA1A1A1)]),
+        ("cyan-pink", [Color(hex: 0x00DFD8), Color(hex: 0xFF0080)]),
+    ]
+    MainActor.assumeIsolated {
+        let app = NSApplication.shared
+        app.setActivationPolicy(.accessory)
+        for (name, stops) in variants {
+            let theme = Theme.vercel.recolored(stops)
+            let monitor = Monitor()
+            monitor.loadPreviewData()
+            let preview = ZStack {
+                WallpaperBackdrop()
+                PanelView(monitor: monitor, themeStore: ThemeStore(theme: theme), onQuit: {}).padding(22)
+            }
+            .frame(width: 364, height: 429)
+            let host = NSHostingView(rootView: preview)
+            host.frame = NSRect(x: 0, y: 0, width: 364, height: 429)
+            let window = NSWindow(contentRect: host.frame, styleMask: [.borderless],
+                                  backing: .buffered, defer: false)
+            window.contentView = host
+            window.setFrameOrigin(NSPoint(x: -10_000, y: -10_000))
+            window.orderFront(nil)
+            RunLoop.main.run(until: Date().addingTimeInterval(0.5))
+            if let rep = host.bitmapImageRepForCachingDisplay(in: host.bounds) {
+                host.cacheDisplay(in: host.bounds, to: rep)
+                if let data = rep.representation(using: .png, properties: [:]) {
+                    try? data.write(to: URL(fileURLWithPath: "\(dir)/vercel-\(name).png"))
+                    print("wrote \(dir)/vercel-\(name).png")
+                }
+            }
+        }
+    }
+    exit(0)
+}
+
+// Render Obsidian with a palette of ring accent colours: `--render-rings <dir>`.
+if let idx = CommandLine.arguments.firstIndex(of: "--render-rings"),
+   idx + 1 < CommandLine.arguments.count {
+    let dir = CommandLine.arguments[idx + 1]
+    let palette: [(String, UInt32, UInt32)] = [
+        ("cyan", 0x64D2FF, 0x5E9DFF),
+        ("blue", 0x0A84FF, 0x5E5CE6),
+        ("violet", 0xA78BFF, 0x64D2FF),
+        ("magenta", 0xFF5AF2, 0x64D2FF),
+        ("mint", 0x30D158, 0x39FFB0),
+        ("amber", 0xFFB340, 0xFF7A1F),
+        ("white", 0xEAEAF0, 0xC8CCD6),
+    ]
+    MainActor.assumeIsolated {
+        let app = NSApplication.shared
+        app.setActivationPolicy(.accessory)
+        for (name, a, b) in palette {
+            let theme = Theme.obsidian.recolored([Color(hex: a), Color(hex: b)])
+            let monitor = Monitor()
+            monitor.loadPreviewData()
+            let preview = ZStack {
+                WallpaperBackdrop()
+                PanelView(monitor: monitor, themeStore: ThemeStore(theme: theme), onQuit: {}).padding(22)
+            }
+            .frame(width: 364, height: 429)
+            let host = NSHostingView(rootView: preview)
+            host.frame = NSRect(x: 0, y: 0, width: 364, height: 429)
+            let window = NSWindow(contentRect: host.frame, styleMask: [.borderless],
+                                  backing: .buffered, defer: false)
+            window.contentView = host
+            window.setFrameOrigin(NSPoint(x: -10_000, y: -10_000))
+            window.orderFront(nil)
+            RunLoop.main.run(until: Date().addingTimeInterval(0.5))
+            if let rep = host.bitmapImageRepForCachingDisplay(in: host.bounds) {
+                host.cacheDisplay(in: host.bounds, to: rep)
+                if let data = rep.representation(using: .png, properties: [:]) {
+                    try? data.write(to: URL(fileURLWithPath: "\(dir)/ring-\(name).png"))
+                    print("wrote \(dir)/ring-\(name).png")
+                }
+            }
+        }
+    }
+    exit(0)
+}
+
+// Headless UI render: `Lumen --render-panel <out.png> [themeId]` renders the
+// dropdown panel with representative data — verify the design without Screen
+// Recording permission.
 if let idx = CommandLine.arguments.firstIndex(of: "--render-panel"),
    idx + 1 < CommandLine.arguments.count {
     let outPath = CommandLine.arguments[idx + 1]
+    let theme = idx + 2 < CommandLine.arguments.count
+        ? Theme.byId(CommandLine.arguments[idx + 2]) : Theme.obsidian
     MainActor.assumeIsolated {
         let app = NSApplication.shared
         app.setActivationPolicy(.accessory)
         let monitor = Monitor()
         monitor.loadPreviewData()
-        let host = NSHostingView(rootView: PanelView(monitor: monitor, onQuit: {}))
+        let host = NSHostingView(rootView: PanelView(monitor: monitor, themeStore: ThemeStore(theme: theme), onQuit: {}))
         host.frame = NSRect(origin: .zero, size: host.fittingSize)
 
         // Render inside an offscreen window so SwiftUI lays out + draws.
@@ -104,7 +273,7 @@ if let idx = CommandLine.arguments.firstIndex(of: "--render-storage"),
                         url: home, size: Int64(3.1 * 1_073_741_824), action: .emptyTrash)
         ]
         model.phase = .done
-        let host = NSHostingView(rootView: StorageView(model: model))
+        let host = NSHostingView(rootView: StorageView(model: model, themeStore: ThemeStore(theme: .vercel)))
         host.frame = NSRect(x: 0, y: 0, width: 720, height: 640)
         let window = NSWindow(contentRect: host.frame, styleMask: [.borderless],
                               backing: .buffered, defer: false)

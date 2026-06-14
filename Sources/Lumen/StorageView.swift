@@ -4,6 +4,8 @@ import AppKit
 /// The Storage window: where your SSD space is going, and what's safe to clear.
 struct StorageView: View {
     @ObservedObject var model: StorageModel
+    @ObservedObject var themeStore: ThemeStore
+    private var theme: Theme { themeStore.theme }
 
     var body: some View {
         VStack(spacing: 0) {
@@ -19,7 +21,8 @@ struct StorageView: View {
             }
         }
         .frame(minWidth: 640, minHeight: 520)
-        .background(.regularMaterial)
+        .background(ThemeBackground(theme: theme))
+        .environment(\.colorScheme, theme.scheme)
     }
 
     // MARK: Overview
@@ -54,7 +57,7 @@ struct StorageView: View {
                 ZStack(alignment: .leading) {
                     Capsule().fill(.quaternary)
                     Capsule()
-                        .fill(Palette.tint(pct, red: 95, orange: 85).gradient)
+                        .fill(theme.ringFill(pct, warnAt: 85, dangerAt: 95))
                         .frame(width: max(4, geo.size.width * min(1, pct / 100)))
                 }
             }

@@ -184,6 +184,9 @@ final class StorageModel: ObservableObject {
 final class StorageWindowController {
     private var window: NSWindow?
     private let model = StorageModel()
+    private let themeStore: ThemeStore
+
+    init(themeStore: ThemeStore) { self.themeStore = themeStore }
 
     func show() {
         if let window {
@@ -192,7 +195,7 @@ final class StorageWindowController {
             model.startIfNeeded()
             return
         }
-        let host = NSHostingView(rootView: StorageView(model: model))
+        let host = NSHostingView(rootView: StorageView(model: model, themeStore: themeStore))
         let win = NSWindow(
             contentRect: NSRect(x: 0, y: 0, width: 720, height: 580),
             styleMask: [.titled, .closable, .resizable, .fullSizeContentView],
@@ -200,6 +203,8 @@ final class StorageWindowController {
         win.title = "Lumen — Storage"
         win.titlebarAppearsTransparent = true
         win.toolbarStyle = .unified
+        win.isOpaque = false                 // let the frosted glass show the desktop
+        win.backgroundColor = .clear
         win.contentView = host
         win.isReleasedWhenClosed = false
         win.center()
