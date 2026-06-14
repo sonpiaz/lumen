@@ -1,21 +1,33 @@
-# Lumen
+# Lumen — a beautiful macOS menu bar system monitor
 
-A beautiful, featherweight system monitor that lives in your Mac's menu bar —
-and tells you exactly where your disk space went.
+Live **CPU, memory, and disk** monitoring in your Mac's menu bar, plus a
+dev-aware **storage cleaner** that shows exactly what's filling your SSD and
+clears it in one click. A lightweight, native **Activity Monitor alternative**
+for developers — Apple Silicon and Intel, macOS 14+.
 
-See CPU, memory, and disk at a glance, quit a runaway app in one click, then open
-**Storage** to find (and safely clear) the caches, build junk, and hidden
-snapshots eating your SSD.
+![Lumen](docs/hero.png)
 
-![Lumen panel](docs/panel.png)
+## The problem
 
-## Why
+You're deep in a build: a dozen terminal tabs, Chrome with forty tabs, VS Code,
+Docker, a simulator. Memory climbs invisibly. Then macOS throws **"Your system
+has run out of application memory,"** force-quits your apps, and the working
+session you spent all afternoon building is gone. Meanwhile your SSD quietly
+fills with `node_modules` and caches until there's no headroom left to swap — so
+it happens sooner, and more often.
 
-Activity Monitor is heavy and buried; DaisyDisk is a separate paid app. Lumen is
-one quiet line in your menu bar that opens into both: a live system panel and an
-on-demand storage explorer. It's built to catch the next *"Your system has run
-out of application memory"* — and the next *"your disk is almost full"* — before
-they happen.
+The numbers that predict that moment already exist. They're just buried three
+clicks deep in Activity Monitor, where you'll never look in time.
+
+## The fix
+
+Lumen keeps them one glance away. A quiet line in your menu bar shows live CPU
+and the memory % that actually predicts trouble — it warms to amber, then red, as
+pressure builds, so you quit Chrome *before* the crash, not after. Click it for
+ring gauges and the top memory-hungry apps (real icons, one-click quit). Click
+the disk ring to find and safely reclaim tens of gigabytes of build junk.
+
+No subprocesses, no daemons, ~14 MB of RAM — it reads straight from the kernel.
 
 ## What it does
 
@@ -29,7 +41,7 @@ top memory-hungry apps, each with its real icon. Quit an app with the ⏏ button
 
 **Storage** (click the Disk ring) — an on-demand scan of where your space lives:
 
-![Lumen storage](docs/storage.png)
+![Lumen storage](docs/storage-real.png)
 
 - **Reclaimable** — dev-aware cleanup that targets the real culprits: Xcode
   DerivedData, iOS DeviceSupport, simulator caches, `~/Library/Caches`,
@@ -97,6 +109,28 @@ For complete disk results, grant Full Disk Access (Lumen prompts you when needed
 .build/release/Lumen --scan-home         # full home scan with timing
 ```
 
+## FAQ
+
+**Is this an Activity Monitor alternative?** Yes — a lighter, always-visible one
+for the three numbers you check most (CPU, memory, disk) plus one-click app
+quitting.
+
+**Will it slow my Mac down?** No. ~14 MB idle, no background daemons; the menu
+bar samples twice a second and the disk scan only runs when you open Storage.
+
+**Is deleting caches safe?** Lumen only ever offers to clear regenerable files
+(caches, DerivedData, the Trash, local snapshots), always behind a confirmation.
+Your documents and source are reveal-only.
+
+**Does it phone home?** No network access at all. Everything is local.
+
 ## License
 
 MIT © 2026 Son Nguyen
+
+---
+
+<sub>macOS system monitor · menu bar CPU / RAM / disk monitor · Activity Monitor
+alternative · free up disk space on Mac · reclaim SSD storage · clear
+node_modules & Xcode DerivedData · fix "your system has run out of application
+memory" · Apple Silicon (M1/M2/M3) & Intel · Swift · SwiftUI · liquid glass</sub>
