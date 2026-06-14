@@ -2,14 +2,14 @@
 import PackageDescription
 
 let package = Package(
-    name: "Pulse",
+    name: "Lumen",
     platforms: [
         .macOS(.v14)
     ],
     targets: [
         .executableTarget(
-            name: "Pulse",
-            path: "Sources/Pulse",
+            name: "Lumen",
+            path: "Sources/Lumen",
             swiftSettings: [
                 // Mixed @MainActor AppKit/SwiftUI + plain Mach sampling code.
                 // Swift 5 language mode keeps concurrency checking pragmatic.

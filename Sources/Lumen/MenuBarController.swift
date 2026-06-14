@@ -11,6 +11,7 @@ final class MenuBarController: NSObject, NSWindowDelegate {
     private var outsideClickMonitor: Any?
     private var timer: Timer?
     private var cpuHistory: [Double] = []   // recent CPU samples for the sparkline
+    private let storage = StorageWindowController()
 
     func install() {
         let item = NSStatusBar.system.statusItem(withLength: NSStatusItem.variableLength)
@@ -71,10 +72,13 @@ final class MenuBarController: NSObject, NSWindowDelegate {
         monitor.processesActive = true
         monitor.refreshProcesses()
 
-        let view = PanelView(monitor: monitor) { [weak self] in
+        let view = PanelView(monitor: monitor, onQuit: { [weak self] in
             self?.dismissPanel()
             NSApp.terminate(nil)
-        }
+        }, onOpenStorage: { [weak self] in
+            self?.dismissPanel()
+            self?.storage.show()
+        })
         let hosting = NSHostingView(rootView: view)
         hosting.setFrameSize(hosting.fittingSize)
 

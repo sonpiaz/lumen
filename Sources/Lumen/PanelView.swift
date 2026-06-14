@@ -8,6 +8,7 @@ import AppKit
 struct PanelView: View {
     @ObservedObject var monitor: Monitor
     var onQuit: () -> Void
+    var onOpenStorage: () -> Void = {}
 
     var body: some View {
         VStack(alignment: .leading, spacing: 0) {
@@ -30,10 +31,10 @@ struct PanelView: View {
 
     private var header: some View {
         HStack(spacing: 7) {
-            Image(systemName: "waveform.path.ecg")
+            Image(systemName: "gauge.with.dots.needle.bottom.50percent")
                 .font(.system(size: 13, weight: .semibold))
                 .foregroundStyle(.primary)
-            Text("Pulse")
+            Text("Lumen")
                 .font(.system(size: 14, weight: .semibold, design: .rounded))
             Spacer()
             Text(MachineInfo.summary)
@@ -57,7 +58,8 @@ struct PanelView: View {
                       tint: Palette.tint(monitor.system.ramPercent))
             RingGauge(label: "Disk", percent: monitor.system.diskPercent,
                       detail: Fmt.compact(monitor.system.diskTotalBytes - monitor.system.diskUsedBytes) + " free",
-                      tint: Palette.tint(monitor.system.diskPercent, red: 95, orange: 85))
+                      tint: Palette.tint(monitor.system.diskPercent, red: 95, orange: 85),
+                      onTap: onOpenStorage)
         }
         .padding(.horizontal, 8)
         .padding(.bottom, 14)
@@ -105,7 +107,7 @@ struct PanelView: View {
                 .font(.system(size: 10))
             Spacer()
             Button(action: onQuit) {
-                Text("Quit Pulse")
+                Text("Quit Lumen")
                     .font(.system(size: 11, weight: .medium))
             }
             .buttonStyle(.plain)
@@ -125,6 +127,8 @@ private struct RingGauge: View {
     let percent: Double
     let detail: String
     let tint: Color
+    var onTap: (() -> Void)? = nil
+    @State private var hovering = false
 
     var body: some View {
         VStack(spacing: 7) {
@@ -146,14 +150,31 @@ private struct RingGauge: View {
             }
             .frame(width: 60, height: 60)
 
-            Text(label)
-                .font(.system(size: 11, weight: .medium))
+            HStack(spacing: 3) {
+                Text(label)
+                    .font(.system(size: 11, weight: .medium))
+                if onTap != nil {
+                    Image(systemName: "chevron.right")
+                        .font(.system(size: 7, weight: .bold))
+                        .foregroundStyle(.tertiary)
+                        .opacity(hovering ? 1 : 0.45)
+                }
+            }
             Text(detail)
                 .font(.system(size: 9.5, design: .rounded))
                 .foregroundStyle(.secondary)
                 .monospacedDigit()
         }
         .frame(maxWidth: .infinity)
+        .padding(.vertical, 4)
+        .background(
+            RoundedRectangle(cornerRadius: 10, style: .continuous)
+                .fill(hovering && onTap != nil ? Color.primary.opacity(0.05) : .clear)
+        )
+        .contentShape(Rectangle())
+        .onHover { hovering = $0 }
+        .onTapGesture { onTap?() }
+        .help(onTap != nil ? "Open Storage — see what's filling your disk" : "")
     }
 }
 
