@@ -1,3 +1,5 @@
+<img src="docs/icon.png" width="104" align="right" alt="Lumen app icon" />
+
 # Lumen — a beautiful macOS menu bar system monitor
 
 Live **CPU, memory, and disk** monitoring in your Mac's menu bar, plus a

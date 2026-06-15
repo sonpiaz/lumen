@@ -25,6 +25,12 @@ rm -rf "$APP"
 mkdir -p "$MACOS" "$RESOURCES"
 cp "$BIN" "$MACOS/$APP_NAME"
 
+# App icon (regenerate from the master PNG if missing).
+if [ ! -f "$ROOT/icon/Lumen.icns" ] && [ -f "$ROOT/icon/Lumen-1024.png" ]; then
+  "$ROOT/scripts/make-icon.sh" >/dev/null 2>&1 || true
+fi
+[ -f "$ROOT/icon/Lumen.icns" ] && cp "$ROOT/icon/Lumen.icns" "$RESOURCES/Lumen.icns"
+
 cat > "$CONTENTS/Info.plist" <<PLIST
 <?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
@@ -40,6 +46,8 @@ cat > "$CONTENTS/Info.plist" <<PLIST
   <key>LSMinimumSystemVersion</key><string>14.0</string>
   <key>LSUIElement</key><true/>
   <key>NSHighResolutionCapable</key><true/>
+  <key>CFBundleIconFile</key><string>Lumen</string>
+  <key>CFBundleIconName</key><string>Lumen</string>
 </dict>
 </plist>
 PLIST

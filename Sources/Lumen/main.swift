@@ -65,6 +65,32 @@ if let idx = CommandLine.arguments.firstIndex(of: "--render-themes"),
     exit(0)
 }
 
+// Render the app icon to a 1024px PNG: `Lumen --render-icon <out.png>`.
+if let idx = CommandLine.arguments.firstIndex(of: "--render-icon"),
+   idx + 1 < CommandLine.arguments.count {
+    let outPath = CommandLine.arguments[idx + 1]
+    MainActor.assumeIsolated {
+        let app = NSApplication.shared
+        app.setActivationPolicy(.accessory)
+        let host = NSHostingView(rootView: IconView())
+        host.frame = NSRect(x: 0, y: 0, width: 1024, height: 1024)
+        let window = NSWindow(contentRect: host.frame, styleMask: [.borderless],
+                              backing: .buffered, defer: false)
+        window.contentView = host
+        window.setFrameOrigin(NSPoint(x: -10_000, y: -10_000))
+        window.orderFront(nil)
+        RunLoop.main.run(until: Date().addingTimeInterval(0.4))
+        if let rep = host.bitmapImageRepForCachingDisplay(in: host.bounds) {
+            host.cacheDisplay(in: host.bounds, to: rep)
+            if let data = rep.representation(using: .png, properties: [:]) {
+                try? data.write(to: URL(fileURLWithPath: outPath))
+                print("wrote \(outPath)")
+            }
+        }
+    }
+    exit(0)
+}
+
 // Headless UI render: `Lumen --render-panel <out.png> [themeId]` renders the
 // dropdown panel with representative data — verify the design without Screen
 // Recording permission.
