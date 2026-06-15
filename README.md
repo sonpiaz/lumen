@@ -2,6 +2,8 @@
 
 # Lumen — a beautiful macOS menu bar system monitor
 
+[![Download the latest release](https://img.shields.io/github/v/release/sonpiaz/lumen?label=Download%20.dmg&color=0070F3)](https://github.com/sonpiaz/lumen/releases/latest) · signed &amp; notarized by Apple · macOS 14+ · ~14 MB
+
 Live **CPU, memory, and disk** monitoring in your Mac's menu bar, plus a
 dev-aware **storage cleaner** that shows exactly what's filling your SSD and
 clears it in one click. A lightweight, native **Activity Monitor alternative**
@@ -81,7 +83,11 @@ warm to amber, then red, as load climbs.
 
 ## Install
 
-Requires macOS 14+ and a Swift toolchain (Xcode or Command Line Tools).
+**Download** the latest [`Lumen.dmg`](https://github.com/sonpiaz/lumen/releases/latest),
+open it, and drag **Lumen** to Applications. It's signed and notarized by Apple,
+so it opens normally — no right-click needed. macOS 14+, Apple Silicon & Intel.
+
+Or build from source (needs a Swift toolchain):
 
 ```bash
 git clone https://github.com/sonpiaz/lumen.git
@@ -92,6 +98,7 @@ open dist/Lumen.app
 
 Launch at login: System Settings → General → Login Items → add `Lumen.app`.
 For complete disk results, grant Full Disk Access (Lumen prompts you when needed).
+Maintainers: see [docs/RELEASE.md](docs/RELEASE.md) for the signed-and-notarized release flow.
 
 ## How the numbers are derived
 
