@@ -220,41 +220,29 @@ if let idx = CommandLine.arguments.firstIndex(of: "--scan-test"),
     exit(0)
 }
 
-// Headless menu-bar preview: renders the sparkline + RAM% on a dark bar.
+// Headless menu-bar preview: renders the labelled "RAM xx%" on a dark bar,
+// showing the calm default (white) and the danger state (red, only ≥96%).
 if let idx = CommandLine.arguments.firstIndex(of: "--render-menubar"),
    idx + 1 < CommandLine.arguments.count {
     let outPath = CommandLine.arguments[idx + 1]
     MainActor.assumeIsolated {
         let scale: CGFloat = 4
-        let w: CGFloat = 120, h: CGFloat = 24
+        let w: CGFloat = 200, h: CGFloat = 24
         let img = NSImage(size: NSSize(width: w * scale, height: h * scale))
         img.lockFocus()
         NSColor(white: 0.13, alpha: 1).setFill()
         NSRect(x: 0, y: 0, width: w * scale, height: h * scale).fill()
         let ctx = NSGraphicsContext.current?.cgContext
         ctx?.scaleBy(x: scale, y: scale)
-        // Demo CPU history with some shape.
-        let demo: [Double] = (0..<32).map { i in
-            let wave: Double = 35.0 * sin(Double(i) / 3.0)
-            let jitter: Double = Double(i % 5) * 4.0
-            return 30.0 + wave + jitter
-        }
-        let spark = Sparkline.image(demo, size: NSSize(width: 30, height: 15))
-        // Emulate the system's template tinting (white on a dark bar).
-        let tinted = NSImage(size: spark.size)
-        tinted.lockFocus()
-        spark.draw(at: .zero, from: .zero, operation: .sourceOver, fraction: 1)
-        NSColor.white.set()
-        NSRect(origin: .zero, size: spark.size).fill(using: .sourceAtop)
-        tinted.unlockFocus()
-        let sparkRect = NSRect(x: 8, y: (h - 15) / 2, width: 30, height: 15)
-        tinted.draw(in: sparkRect)
-        ("  61%" as NSString).draw(
-            at: NSPoint(x: 40, y: (h - 13) / 2),
-            withAttributes: [
-                .font: NSFont.monospacedDigitSystemFont(ofSize: 11, weight: .medium),
-                .foregroundColor: NSColor.systemOrange
-            ])
+        let font = NSFont.monospacedDigitSystemFont(ofSize: 12, weight: .regular)
+        // Normal usage → plain white (no more red at 85%).
+        ("RAM 85%" as NSString).draw(at: NSPoint(x: 10, y: (h - 14) / 2),
+            withAttributes: [.font: font, .foregroundColor: NSColor.white])
+        NSColor(white: 1, alpha: 0.25).set()
+        NSRect(x: 92, y: 6, width: 1, height: h - 12).fill()
+        // Genuine danger zone → red (only ≥96%).
+        ("RAM 97%" as NSString).draw(at: NSPoint(x: 108, y: (h - 14) / 2),
+            withAttributes: [.font: font, .foregroundColor: NSColor.systemRed])
         img.unlockFocus()
         if let tiff = img.tiffRepresentation,
            let rep = NSBitmapImageRep(data: tiff),

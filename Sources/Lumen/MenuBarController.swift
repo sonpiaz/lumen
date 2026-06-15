@@ -11,7 +11,6 @@ final class MenuBarController: NSObject, NSWindowDelegate {
     private var panel: NSPanel?
     private var outsideClickMonitor: Any?
     private var timer: Timer?
-    private var cpuHistory: [Double] = []   // recent CPU samples for the sparkline
     private lazy var storage = StorageWindowController(themeStore: themeStore)
 
     func install() {
@@ -41,22 +40,18 @@ final class MenuBarController: NSObject, NSWindowDelegate {
 
     private func updateTitle() {
         guard let button = statusItem?.button else { return }
+        button.image = nil   // no decorative sparkline — just the labelled number
 
-        // Live CPU sparkline — the "pulse". Kept as a template image so macOS
-        // tints it correctly for light/dark menu bars.
-        cpuHistory.append(monitor.system.cpuPercent)
-        if cpuHistory.count > 32 { cpuHistory.removeFirst(cpuHistory.count - 32) }
-        button.image = Sparkline.image(cpuHistory, size: NSSize(width: 30, height: 15))
-
-        // RAM percentage — the number that actually predicts trouble. Stays
-        // monochrome until it climbs, then warms to orange/red.
+        // RAM % is the number that predicts "out of application memory". Labelled
+        // so it's unmistakable, and calm by default: monochrome until the genuine
+        // danger zone, so it isn't red all day at normal-but-high usage.
         let ram = Int(monitor.system.ramPercent.rounded())
         var attrs: [NSAttributedString.Key: Any] = [
-            .font: NSFont.monospacedDigitSystemFont(ofSize: 11, weight: .medium)
+            .font: NSFont.monospacedDigitSystemFont(ofSize: 12, weight: .regular)
         ]
-        if ram >= 85 { attrs[.foregroundColor] = NSColor.systemRed }
-        else if ram >= 72 { attrs[.foregroundColor] = NSColor.systemOrange }
-        button.attributedTitle = NSAttributedString(string: " \(ram)%", attributes: attrs)
+        if ram >= 96 { attrs[.foregroundColor] = NSColor.systemRed }
+        else if ram >= 90 { attrs[.foregroundColor] = NSColor.systemOrange }
+        button.attributedTitle = NSAttributedString(string: "RAM \(ram)%", attributes: attrs)
     }
 
     // MARK: Panel
