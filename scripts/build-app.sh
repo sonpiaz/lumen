@@ -52,9 +52,10 @@ cat > "$CONTENTS/Info.plist" <<PLIST
 </plist>
 PLIST
 
-# Prefer a stable Apple Development identity so the app keeps a consistent
-# code identity across rebuilds (login items, etc.). Falls back to ad-hoc.
-SIGN_IDENTITY="${VITALS_SIGN_IDENTITY:-}"
+# Sign with LUMEN_SIGN_IDENTITY when set (release.sh passes the Developer ID
+# identity); otherwise prefer a stable Apple Development identity so local
+# rebuilds keep a consistent code identity. Falls back to ad-hoc.
+SIGN_IDENTITY="${LUMEN_SIGN_IDENTITY:-}"
 if [ -z "$SIGN_IDENTITY" ]; then
   SIGN_IDENTITY="$(security find-identity -v -p codesigning 2>/dev/null \
     | grep -oE '"Apple Development: [^"]+"' | head -1 | tr -d '"')"
